@@ -1,38 +1,85 @@
 #include "../include/tester.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
-void vector_test(struct vector *vector) {
-    size_t capacity = vector_get_size(vector);
+void vector_test() {
+    vector_test_add_delete();
+    vector_test_push_pop();
+    vector_test_concatenate();
+    vector_test_sort();
+}
 
-    vector_set_value(vector, 0, -20);
-    printf("Got value: %lld\n", vector_get_value(vector, 0));
-    printf("Got value: %lld\n", vector_get_value(vector, 1));
+void vector_test_add_delete() {
+    printf("\n\nStarting add-delete test...\n\n");
+    struct vector* vector = vector_create(100);
+    for (size_t i = 1; i <= 500; i++) {
+        vector_set_value(vector, rand() % 100, i);
+        vector_delete_value(vector, rand() % 100);
+    }
+    vector_print(vector, "test_add_delete.txt");
+    vector_show_defined(vector);
+    printf("Current amount of defined elements: %zu\n", vector_get_count(vector));
+    vector_destroy(vector);
+}
 
-    printf("\nTrying to get out of bounds of vector...\n");
-    printf("Current last used index: %lld\n", vector_get_next_pointer(vector) - 1);
-    for (size_t i = vector_get_next_pointer(vector); i < capacity * 3; i++) {
-        vector_set_value(vector, i * 3, i * 2);
-        vector_push_back(vector, i*i);
-        printf("Vector count: %zu\n", vector_get_count(vector));
+void vector_test_sort() {
+    printf("\n\nStarting sort test...\n\n");
+    struct vector* vector = vector_create(10);
+
+    size_t size = vector_get_size(vector) * 2;
+
+    for (size_t i = 1; i <= size * 4; i += 2) {
+        vector_set_value(vector, i, rand() % 75);
+    }
+    vector_show(vector);
+    vector_sort(vector);
+    printf("\nSorted vector:\n\n");
+    // vector_show(vector);
+    vector_show_defined(vector);
+    vector_print(vector, "test_sort.txt");
+
+    vector_destroy(vector);
+}
+
+void vector_test_push_pop() {
+
+    printf("\n\nStarting push-pop test...\n\n");
+
+    size_t capacity = 0;
+    struct vector* vector = vector_create(capacity);
+
+    int64_t value;
+    for (size_t i = 0; i < 15; ++i) {
+        vector_push_back(vector, i * i);
+        printf("Pushed %zu\n", i * i);
+
+        vector_push_back(vector, i * i * i);
+        printf("Pushed %zu\n", i * i * i);
+
+        value = vector_pop_back(vector);
+        printf("Popped %zu\n", value);
     }
 
-    printf("\nNext pointer: %zu\n", vector_get_next_pointer(vector));
+    vector_print(vector, "test_push_pop.txt");
 
-    vector_push_back(vector, 2);
-    vector_push_back(vector, 3);
-    vector_push_back(vector, 4);
+    vector_destroy(vector);
+}
 
-    vector_pop_back(vector);
-    vector_pop_back(vector);
+void vector_test_concatenate() {
+    printf("\n\nStarting concatenate test...\n\n");
+    struct vector* vector1 = vector_create(10);
+    struct vector* vector2 = vector_create(10);
 
-    struct vector* additional = vector_create(capacity);
-
-    for (size_t i = 1; i <= capacity * 3; i++) {
-        vector_push_back(additional, - i * i);
+    for (size_t i = 0; i < 10; ++i) {
+        vector_set_value(vector1, i, i * i);
+        vector_set_value(vector2, i, - i * i * i);
     }
 
-    vector_concatenate(vector, additional);
+    vector_concatenate(vector1, vector2);
 
-    return;
+    vector_print(vector1, "test_concatenate.txt");
+
+    vector_destroy(vector1);
+    vector_destroy(vector2);
 }

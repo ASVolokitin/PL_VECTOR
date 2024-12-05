@@ -18,6 +18,8 @@ void vector_destroy(struct vector* vector);
 
 int64_t vector_get_value(const struct vector* vector, size_t index);
 
+int64_t vector_get_value_if_defined(const struct vector* vector, size_t index);
+
 void vector_set_value(struct vector* vector, size_t index, int64_t value);
 
 void vector_delete_value(struct vector* vector, size_t index);
@@ -53,5 +55,13 @@ void vector_set_data_ptr(struct vector* vector, struct vector_int* data);
 void vector_concatenate(struct vector* vector, struct vector* additional_vector);
 
 void vector_print(const struct vector* vector, const char* filename);
+
+void vector_print_defined(const struct vector* vector, const char* filename);
+
+void vector_show(const struct vector* vector);
+
+void vector_show_defined(const struct vector* vector);
+
+void vector_sort(struct vector* vector);
 
 #endif
