@@ -64,4 +64,6 @@ void vector_show_defined(const struct vector* vector);
 
 void vector_sort(struct vector* vector);
 
+void vector_swap(struct vector *vector, size_t i, size_t j);
+
 #endif

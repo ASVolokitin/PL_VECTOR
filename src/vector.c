@@ -25,8 +25,8 @@ struct vector* vector_create(size_t size) {
   vector_set_data_ptr(vector, allocate_memory(size));
   vector_set_count(vector, 0);
   vector->size = size;
-  vector_set_next_pointer(vector, 0);
   fill_with_zeros(vector, 0, size);
+  vector_set_next_pointer(vector, size);
   return vector;
 }
 
@@ -61,17 +61,31 @@ void vector_set_value(struct vector* vector, size_t index, int64_t value) {
     log_info("Not enough memory, reallocating ...");
     vector_set_size(vector, vector_get_size(vector) * 2 ? vector_get_size(vector) * 2 : 1);
   }
-  vector->data[index] = vint_init(value, true);
+  if (!vector_get_vint(vector, index).defined) {
+    vector->data[index] = vint_init(value, true);
+    vector_inc_count(vector);
+  }
   if (index >= vector_get_next_pointer(vector)) {
     vector_set_next_pointer(vector, index + 1);
   }
-  vector_inc_count(vector);
-  // printf("%zu\n", vector_get_value(vector, index));
+  vector->data[index].value = value;
 }
 
 void vector_delete_value(struct vector* vector, size_t index) {
-  if (vector_get_vint(vector, index).defined) vector_dec_count(vector);
-  vector->data[index] = vint_init(0, false);
+  if (index >= vector->size) {
+    printf("Error occured while deleting value: index out of range");
+    sysexit(EFAULT);
+  }
+  if (vector_get_vint(vector, index).defined) {
+    vector_dec_count(vector);
+    vector->data[index] = vint_init(0, false);
+    vector_dec_next_pointer(vector);
+    for (size_t i = index; i < vector_get_next_pointer(vector); ++i) {
+      vector_swap(vector, i, i+1);
+    }
+    return;
+  }
+  printf("Element with index %zu was not deleted because it was not defined\n", index);
 }
 
 void vector_push_back(struct vector* vector, int64_t value) {
@@ -79,10 +93,12 @@ void vector_push_back(struct vector* vector, int64_t value) {
 }
 
 int64_t vector_pop_back(struct vector* vector) {
-
+  if (vector_get_size(vector) == 0) {
+    printf("Popping back failed: vector is empty\n");
+    sysexit(EFAULT);
+  }
   int64_t value = vector_get_value(vector, vector_get_next_pointer(vector) - 1);
   vector_delete_value(vector, vector_get_next_pointer(vector) - 1);
-  vector_dec_next_pointer(vector);
   return value;
 }
 
@@ -96,7 +112,7 @@ void vector_set_size(struct vector* vector, size_t new_size) {
     vector_set_data_ptr(vector, reallocate_memory(vector_get_data_ptr(vector), new_size));
     if (old_size < new_size) fill_with_zeros(vector, vector_get_size(vector), new_size);
     vector->size = new_size;
-    printf("Current vector length: %zu\n", vector_get_size(vector));
+    printf("Resizing vector, now used: %zu of %zu\n", vector_get_count(vector), vector_get_size(vector));
   }
 }
 
@@ -163,7 +179,7 @@ void vector_print_defined(const struct vector* vector, const char* filename) {
 }
 
 void vector_show(const struct vector* vector) {
-  for (size_t i = 0; i < vector_get_next_pointer(vector); i++) {
+  for (size_t i = 0; i < vector_get_size(vector); i++) {
     printf("%lld\n", vector_get_value(vector, i));
   }
 }
@@ -175,6 +191,14 @@ void vector_show_defined(const struct vector* vector) {
 }
 
 void vector_sort(struct vector* vector) {
-  if (vector_get_size(vector) > 0) heap_sort(vector_get_data_ptr(vector), vector_get_size(vector));
+  if (vector_get_size(vector) > 0) heap_sort(vector, vector_get_size(vector));
   else printf("Sorting vector stopped: vector is empty\n");
+}
+
+void vector_swap(struct vector *vector, size_t i, size_t j) {
+  struct vector_int tmp = vector->data[i];
+  vector->data[i].value = vector->data[j].value;
+  vector->data[i].defined = vector->data[j].defined;
+  vector->data[j].value = tmp.value;
+  vector->data[j].defined = tmp.defined;
 }

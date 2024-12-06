@@ -12,13 +12,13 @@ void vector_test() {
 
 void vector_test_add_delete() {
     printf("\n\nStarting add-delete test...\n\n");
-    struct vector* vector = vector_create(100);
-    for (size_t i = 1; i <= 500; i++) {
-        vector_set_value(vector, rand() % 100, i);
-        vector_delete_value(vector, rand() % 100);
+    struct vector* vector = vector_create(0);
+    for (size_t i = 0; i < 16; i++) {
+        vector_push_back(vector, -i);
     }
+    vector_delete_value(vector, 0);
+    vector_delete_value(vector, 9);
     vector_print(vector, "test_add_delete.txt");
-    vector_show_defined(vector);
     printf("Current amount of defined elements: %zu\n", vector_get_count(vector));
     vector_destroy(vector);
 }
