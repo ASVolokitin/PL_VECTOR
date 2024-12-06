@@ -5,6 +5,7 @@
 
 #include "../include/vector.h"
 #include "../include/vector_int.h"
+#include "vector_entity.c"
 
 void heapify(struct vector *vector, size_t size, size_t root) {
   size_t largest = root;

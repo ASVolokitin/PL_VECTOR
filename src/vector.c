@@ -8,6 +8,7 @@
 #include "../include/util.h"
 #include "../include/vector_int.h"
 #include "../include/vector_sort.h"
+#include "vector_entity.c"
 
 static void fill_with_zeros(struct vector* vector, size_t begin, size_t end) {
   printf("Filling with zeros from %zu to %zu ...\n", begin, end);
@@ -21,6 +22,7 @@ struct vector* vector_create(size_t size) {
   struct vector* vector = malloc(sizeof(struct vector));
   if (!vector) {
     log_error("Error occured allocating memory for vector");
+    sysexit(ENOMEM);
   }
   vector_set_data_ptr(vector, allocate_memory(size));
   vector_set_count(vector, 0);
