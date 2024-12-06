@@ -54,6 +54,7 @@ int64_t vector_get_value_if_defined(const struct vector* vector, size_t index) {
   if (vint.defined) return vint.value;
   printf("Error occured while getting value from index %zu: value is undefined\n", index);
   sysexit(EFAULT);
+  return 0;
 }
 
 void vector_set_value(struct vector* vector, size_t index, int64_t value) {
@@ -182,6 +183,19 @@ void vector_show(const struct vector* vector) {
   for (size_t i = 0; i < vector_get_size(vector); i++) {
     printf("%lld\n", vector_get_value(vector, i));
   }
+}
+
+struct vector* vector_slice(struct vector* vector, size_t start, size_t end) {
+  if (end >= vector_get_size(vector)) end = vector_get_size(vector) - 1;
+  struct vector* slice = vector_create(0);
+  size_t count = 0;
+  for (size_t i = start; i < end; i++) {
+    vector_push_back(slice, vector_get_value(vector, i));
+    if (vector_get_vint(vector, i).defined) {count++;}
+  }
+  vector_set_count(slice, count);
+  vector_set_next_pointer(slice, vector_get_size(slice));
+  return slice;
 }
 
 void vector_show_defined(const struct vector* vector) {

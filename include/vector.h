@@ -60,6 +60,8 @@ void vector_print_defined(const struct vector* vector, const char* filename);
 
 void vector_show(const struct vector* vector);
 
+struct vector* vector_slice(struct vector* vector, size_t start, size_t end);
+
 void vector_show_defined(const struct vector* vector);
 
 void vector_sort(struct vector* vector);
